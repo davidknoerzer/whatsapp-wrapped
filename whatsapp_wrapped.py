@@ -24,12 +24,13 @@ def get_top_senders(senders, n, year=None):
     for sender_name, sender in senders.items():
         if year is not None:
             texts = sender.get_texts_by_year(year)
+            for text in texts:
+                if text.date.split('.')[2] == year:
+                    total_messages_per_sender[sender_name] += 1
         else:
             texts = sender.texts
-
-        for text in texts:
-            if text.date.split('.')[2] == year:
-                total_messages_per_sender[sender_name] += 1
+            for text in texts:
+                total_messages_per_sender[sender_name] += 1     
 
     return total_messages_per_sender.most_common(n)
     
