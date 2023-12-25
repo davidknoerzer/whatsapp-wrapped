@@ -1,0 +1,6 @@
+
+.DS_Store
+__pycache__/sender.cpython-311.pyc
+__pycache__/text.cpython-311.pyc
+data/.DS_Store
+*.pyc
