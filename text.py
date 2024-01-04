@@ -1,17 +1,26 @@
-from datetime import datetime
 import re
+
 
 class Text:
     def __init__(self, date, time, message):
         self.date = date
         self.time = time
         self.message = message
-        self.emojis = re.findall(r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F1E0-\U0001F1FF\U0001F3FB-\U0001F3FC\U0001F3FD-\U0001F3FE\U0001F3FF]', message)
-        skin_tones = ['\U0001F3FB', '\U0001F3FC', '\U0001F3FD', '\U0001F3FE', '\U0001F3FF',]
-        for skin_tone in skin_tones:
-            if skin_tone in self.emojis:
-                self.emojis.remove(skin_tone)
+        self.emojis = re.findall(
+            "[\U0001F1E0-\U0001F1FF" +  # flags (iOS)
+            "\U0001F300-\U0001F5FF" +  # symbols & pictographs
+            "\U0001F600-\U0001F64F" +  # emoticons
+            "\U0001F680-\U0001F6FF" +  # transport & map symbols
+            "\U0001F700-\U0001F77F" +  # alchemical symbols
+            "\U0001F780-\U0001F7FF" +  # Geometric Shapes Extended
+            "\U0001F800-\U0001F8FF" +  # Supplemental Arrows-C
+            "\U0001F900-\U0001F9FF" +  # Supplemental Symbols and Pictographs
+            "\U0001FA00-\U0001FA6F" +  # Chess Symbols
+            "\U0001FA70-\U0001FAFF" +  # Symbols and Pictographs Extended-A
+            "\U00002702-\U000027B0" +  # Dingbats
+            "\U000024C2-\U0001F251]", self.message)
 
-    
-    def parse_datetime(self):
-        return datetime.strptime(f'{self.date} {self.time}', '%d.%m.%y %H:%M:%S')
+
+"""
+re.sub(
+            "[\U0001F3FB\U0001F3FC\U0001F3FD\U0001F3FE\U0001F3FF]+", '',"""
