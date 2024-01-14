@@ -1,118 +1,76 @@
-import re
-from collections import Counter
-from dateutil.parser import parse
-import calendar
+import pandas as pd, emoji
 
+def remove_skin_tones(text):
+    text = emoji.demojize(text)
+    skin_tones = ['_dark_skin_tone', '_light_skin_tone', '_medium-dark_skin_tone', '_medium-light_skin_tone', '_medium_skin_tone']
 
-def filter_by_year(texts, year):
-    if year is not None:
-        return [text for text in texts if parse(text.date).year == year]
-    else:
-        return texts
+    for tone in skin_tones:
+        text = text.replace(tone, '')
 
+    text = emoji.emojize(text)
+    return(text)
 
-def get_top_months(senders, n, year=None):
-    month_counts = Counter()
+def distinct_emoji_count(df, year, n):
+    df_year = df[df['date'].str.contains(year)]
+    
+    emojis = []
+    
+    for text in df_year['text']:
+        text = remove_skin_tones(text)
+        
+        emojis += emoji.distinct_emoji_list(text)
 
-    for sender in senders.values():
-        texts = filter_by_year(sender.texts, year)
-        for text in texts:
-            date = parse(text.date)
-            month_counts[date.month] += 1
+    distinct_emoji_count = pd.Series(emojis).value_counts().head(n)
+    return(distinct_emoji_count)
 
-    return month_counts.most_common(n)
+def rank_names_by_messages(df, year, n):
+    df_year = df[df['date'].str.contains(year)]
+    
+    name_counts = df_year['name'].value_counts().head(n)
+    
+    return name_counts
 
+def find_favorite_emojis(df, year, n):
 
-def get_top_senders(senders, n, year=None):
-    total_messages_per_sender = Counter()
+    df_year = df[df['date'].str.contains(year)]
+    
+    emojis = []
+    
+    for text in df_year['text']:
+         
+       text = remove_skin_tones(text)
 
-    for sender_name, sender in senders.items():
-        texts = filter_by_year(sender.texts, year)
-        total_messages_per_sender[sender_name] += len(texts)
+       pre_emojis = []
+       pre_emojis += emoji.emoji_list(text)
+       if(pre_emojis):
+           for i in pre_emojis:
+                emojis += i['emoji']
+       continue
 
-    return total_messages_per_sender.most_common(n)
+            
+    emoji_counts = pd.Series(emojis).value_counts().head(n)
+    
+    return emoji_counts
 
+def find_months_with_most_texts(df, year, n):
+    df_year = df[df['date'].str.contains(year)]
+    
+    df_year['month'] = pd.to_datetime(df_year['date'], format="%d.%m.%Y").dt.month
 
-def get_top_emojis(senders, n, year=None):
-    all_emojis = [emoji for sender in senders.values()
-                  for text in filter_by_year(sender.texts, year)
-                  for emoji in text.emojis]
-    all_emojis_counter = Counter(all_emojis)
-    return all_emojis_counter.most_common(n)
+    month_counts = df_year['month'].value_counts().head(n)
+    
+    return month_counts
 
+def get_yearly_wrapped(df, year, n):
 
-def get_top_sender_emojis(sender, n, year=None):
-    all_emojis = [emoji
-                  for text in filter_by_year(sender.texts, year)
-                  for emoji in text.emojis]
-    all_emojis_counter = Counter(all_emojis)
-    return all_emojis_counter.most_common(n)
+    distinct_emoji_counts = distinct_emoji_count(df, year, n+5)
+    print(distinct_emoji_counts)
 
+    name_counts = rank_names_by_messages(df, year, n)
+    print(name_counts)
 
-"""
-def get_top_emojis(senders, n, sender_name=None, year=None):
-    if sender_name is not None:
-        sender = senders[sender_name]
-        texts = filter_by_year(sender.texts, year)
+    emoji_counts = find_favorite_emojis(df, year, n)
+    print(emoji_counts)
 
-        emoji_counter = Counter(
-            [emoji for text in texts for emoji in text.emojis])
-        return emoji_counter.most_common(n)
-    else:
-        all_emojis = [emoji for sender in senders.values()
-                      for text in filter_by_year(sender.texts, year)
-                      for emoji in text.emojis]
-        all_emojis_counter = Counter(all_emojis)
-        return all_emojis_counter.most_common(n)
-"""
-
-
-def get_top_words(senders, n, sender_name=None, year=None):
-    word_pattern = re.compile(r'\b\w+\b')
-    words_counter = Counter()
-
-    for sender_name, sender in senders.items():
-        if sender_name is not None and sender_name != sender.name:
-            continue
-
-        texts = filter_by_year(sender.texts, year)
-        for text in texts:
-            for word in word_pattern.findall(text.message):
-                words_counter[word] += 1
-
-    return words_counter.most_common(n)
-
-
-def get_yearly_wrapped_stats(senders, n, year=None):
-
-    print("\nAll-Time: Top 5")
-    print("\nMost used emojis")
-    for emoji, count in get_top_emojis(senders, n, None):
-        print(f"\t{emoji}: {count}")
-
-    print(f"Top Senders:")
-    for sender, count in get_top_senders(senders, n, None):
-        print(f"\t{sender}: {count} messages")
-
-    print(f"Most active months:")
-    for month, count in get_top_months(senders, n, None):
-        print(f"\t{calendar.month_abbr[month]}: {count} messages")
-
-    print(f"\nYEAR {year}: Top 5")
-    print("Most used emojis:")
-    for emoji, count in get_top_emojis(senders, n, year):
-        print(f"\t{emoji}: {count}")
-
-    print(f"Top Senders:")
-    for sender, count in get_top_senders(senders, n, year):
-        print(f"\t{sender}: {count} messages")
-
-    print("Most active months:")
-    for month, count in get_top_months(senders, n, year):
-        print(f"\t{calendar.month_abbr[month]}: {count} messages")
-
-    print("Individual Emoji Preference:")
-    for sender_key, sender in senders.items():
-        print(sender_key)
-        for emoji, count in get_top_sender_emojis(sender, n, year):
-            print(f"\t{emoji}: {count}")
+    month_counts = find_months_with_most_texts(df, year, n)
+    print(month_counts)
