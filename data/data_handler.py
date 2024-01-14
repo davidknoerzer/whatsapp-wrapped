@@ -1,6 +1,4 @@
-import re, pandas as pd, numpy as np
-from text import Text
-from sender import Sender
+import re, pandas as pd
 
 def prep_data(input_file, output_file):
     
