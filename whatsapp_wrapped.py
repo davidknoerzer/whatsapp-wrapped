@@ -30,28 +30,6 @@ def rank_names_by_messages(df, year, n):
     
     return name_counts
 
-def find_favorite_emojis(df, year, n):
-
-    df_year = df[df['date'].str.contains(year)]
-    
-    emojis = []
-    
-    for text in df_year['text']:
-         
-       text = remove_skin_tones(text)
-
-       pre_emojis = []
-       pre_emojis += emoji.emoji_list(text)
-       if(pre_emojis):
-           for i in pre_emojis:
-                emojis += i['emoji']
-       continue
-
-            
-    emoji_counts = pd.Series(emojis).value_counts().head(n)
-    
-    return emoji_counts
-
 def find_months_with_most_texts(df, year, n):
     df_year = df[df['date'].str.contains(year)]
     
@@ -63,14 +41,11 @@ def find_months_with_most_texts(df, year, n):
 
 def get_yearly_wrapped(df, year, n):
 
-    distinct_emoji_counts = distinct_emoji_count(df, year, n+5)
+    distinct_emoji_counts = distinct_emoji_count(df, year, n)
     print(distinct_emoji_counts)
 
     name_counts = rank_names_by_messages(df, year, n)
     print(name_counts)
-
-    emoji_counts = find_favorite_emojis(df, year, n)
-    print(emoji_counts)
 
     month_counts = find_months_with_most_texts(df, year, n)
     print(month_counts)
