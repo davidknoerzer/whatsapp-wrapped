@@ -18,12 +18,10 @@ def remove_skin_tones(text):
     return text
 
 
-def rank_emoji_distinct(df, year, n):
-    df_year = df[df["date"].str.contains(year)]
-
+def rank_emoji_distinct(df, n):
     emojis = []
 
-    for text in df_year["text"]:
+    for text in df["wa_text"]:
         text = remove_skin_tones(text)
 
         emojis += emoji.distinct_emoji_list(text)
@@ -32,19 +30,17 @@ def rank_emoji_distinct(df, year, n):
     return emoji_rank
 
 
-def rank_names_by_messages(df, year, n):
-    df_year = df[df["date"].str.contains(year)]
-
-    name_rank = df_year["name"].value_counts().head(n)
+def rank_names_by_messages(df, n):
+    name_rank = df["wa_name"].value_counts().head(n)
 
     return name_rank
 
 
-def rank_months_by_messages(df, year, n):
-    df_year = df[df["date"].str.contains(year)]
+def rank_months_by_messages(df, n):
+    df["month"] = df.loc[:, "wa_datetime"]
 
-    df_year["month"] = pandas.to_datetime(df_year["date"], format="%d.%m.%Y").dt.month
+    print(df["month"].dt.month)
 
-    month_rank = df_year["month"].value_counts().head(n)
+    month_rank = df["month"].dt.month.value_counts().head(n)
 
     return month_rank
