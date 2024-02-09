@@ -6,11 +6,11 @@ app = Flask(__name__)
 
 
 @app.route("/")
-def main():
-    return render_template("index.html")
+def index():
+    return render_template("./index.html")
 
 
-@app.route("/whatsapp-wrapped", methods=["POST"])
+@app.route("/api/whatsapp-wrapped", methods=["POST"])
 def whatsapp_wrapped():
     if "file" not in request.files:
         return "No file part in the request", 400
@@ -19,7 +19,7 @@ def whatsapp_wrapped():
     if file.filename == "":
         return "No file selected", 400
 
-    year = request.args.get("year")
+    year = 2023 #request.args.get("year")
 
     cleaned_lines = process_lines(file)
     df = extract_data(cleaned_lines)
@@ -32,19 +32,17 @@ def whatsapp_wrapped():
     emoji_rank = rank_emoji_distinct(filtered_df, n)
     month_rank = rank_months_by_messages(filtered_df, n)
 
-    print("RESPONSE:")
+    name_rank_json = name_rank.to_json(orient='index')
+    emoji_rank_json = emoji_rank.to_json(orient='index')
+    month_rank_json = month_rank.to_json(orient='index')
 
     response = {
-        "name_rank": name_rank.to_json,
-        "emoji_rank": emoji_rank.to_json,
-        "month_rank": month_rank.to_json,
+        "nameRank": name_rank_json,
+        "emojiRank": emoji_rank_json,
+        "monthRank": month_rank_json,
     }
 
-    print(response)
-
     return response
-    # return render_template("whatsapp_wrapped.html", name=f.filename)
-
 
 def process_lines(file):
     for line in file:
@@ -73,7 +71,3 @@ def extract_data(lines):
             )
 
     return pandas.DataFrame(messages)
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
