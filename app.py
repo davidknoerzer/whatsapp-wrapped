@@ -1,6 +1,7 @@
 from flask import *
 import re, pandas
 from whatsapp_wrapped import *
+from datetime import date
 
 app = Flask(__name__)
 
@@ -19,18 +20,27 @@ def whatsapp_wrapped():
     if file.filename == "":
         return "No file selected", 400
 
-    year = 2023 #request.args.get("year")
+    year = date.today().year -1
+
 
     cleaned_lines = process_lines(file)
     df = extract_data(cleaned_lines)
+    
+    # TODO calculate number of entries to do based on group size
 
-    n = 3
+    n = 5
 
     filtered_df = df.loc[df["wa_datetime"].dt.year == int(year)]
 
-    name_rank = rank_names_by_messages(filtered_df, n)
-    emoji_rank = rank_emoji_distinct(filtered_df, n)
-    month_rank = rank_months_by_messages(filtered_df, n)
+    name_rank = pandas.DataFrame(rank_names_by_messages(filtered_df, n))
+    emoji_rank = pandas.DataFrame(rank_emoji_distinct(filtered_df, n))
+    month_rank = pandas.DataFrame(rank_months_by_messages(filtered_df, n))
+
+    print("START PRINT")
+    print(name_rank)
+    print(emoji_rank)
+    print(month_rank)
+    print("END PRINT")
 
     name_rank_json = name_rank.to_json(orient='index')
     emoji_rank_json = emoji_rank.to_json(orient='index')

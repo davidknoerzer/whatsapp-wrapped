@@ -1,19 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Whatsapp Wrapped</title>
   </head>
   <body>
-    <h1>Whatsapp Wrapped</h1>
-    <form
-      action="/api/whatsapp-wrapped"
-      method="post"
-      enctype="multipart/form-data"
-    >
-      <label for="file">File</label>
-      <input id="file" name="file" type="file" accept="plain/text" />
-      <button>Upload</button>
+    <h2>Upload .txt File</h2>
+    <form id="uploadForm">
+      <input type="file" id="fileInput" accept=".txt" required />
+      <button type="submit">Upload</button>
     </form>
+    <div id="response"></div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
   </body>
-  <script src="script.js"></script>
 </html>
