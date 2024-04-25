@@ -41,7 +41,7 @@ export default function Content() {
     setLoading(true);
     const formData = new FormData();
     formData.append("file", file);
-    const host = "http://127.0.0.1:8000/";
+    const host = "https://data-analytics-api-seven.vercel.app/";
     let url = host + "api/whatsapp-wrapped";
     if (yearValid) {
       url += `?year=${year}`;
